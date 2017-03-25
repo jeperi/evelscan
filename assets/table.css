@@ -1,0 +1,103 @@
+.slick-header {
+  background: black;
+  font-weight: bold;
+}
+.slick-header-column.ui-state-default {
+  background: black;
+  height: auto;
+  padding: 0.15em 0.2em;
+  border-right: none;
+}
+.slick-header-column-sorted {
+  font-style: inherit;
+}
+.slick-cell, .slick-headerrow-column, .slick-footerrow-column {
+  border: none;
+  border-right: 1px solid black;
+  border-bottom: none;
+  color: white;
+}
+.slick-cell.highlight {
+  background: #003333;
+  transition: background 0.5s ease;
+}
+.slick-row {
+  background: #0D4D4D;
+}
+.slick-row:hover {
+  background: #003333;
+  transition: background 0.3s ease;
+}
+.slick-column-name {
+  text-transform: uppercase;
+  color: #669999;
+}
+.slick-sort-indicator {
+  display: none !important;
+  float: right;
+  margin: 6px 4px 0px 4px;
+}
+.slick-sort-indicator-asc {
+  display: inline-block;
+}
+.slick-sort-indicator-desc {
+  display: inline-block;
+}
+.slick-resizable-handle {
+  width: 3px;
+  right: 0;
+}
+.slick-header-columns, .slick-headerrow-columns, .slick-footerrow-columns {
+  position: relative;
+  white-space: nowrap;
+  cursor: default;
+  overflow: hidden;
+}
+.slick-header-column.ui-state-default {
+  border-left: 0px !important;
+  border-top: 0px !important;
+  border-bottom: 0px !important;
+  float: left;
+  /*line-height: 16px;*/
+  margin: 0;
+  /*text-overflow: ellipsis;*/
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+}
+.slick-sort-indicator {
+  width: 8px;
+  height: 5px;
+}
+.slick-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  display: block;
+  cursor: col-resize;
+  top: 0;
+  height: 100%;
+}
+.grid-canvas {
+  position: relative;
+  outline: 0;
+}
+.slick-cell, .slick-headerrow-column, .slick-footerrow-column {
+  position: absolute;
+  text-overflow: clip;
+  vertical-align: middle;
+  z-index: 1;
+  padding: 1px 2px 2px 1px;
+  margin: 0;
+  white-space: nowrap;
+  cursor: default;
+  overflow: hidden;
+}
+.grid-canvas {
+  position: relative;
+  outline: 0;
+}
+.slick-header.ui-state-default, .slick-headerrow.ui-state-default, .slick-footerrow.ui-state-default {
+  width: 100%;
+  overflow: hidden;
+  border-left: 0px !important;
+}

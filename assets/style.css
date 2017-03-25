@@ -1,0 +1,181 @@
+body {
+  background: #669999;
+  color: white;
+  animation: fadein 2s;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.pusher {
+  width: 100%;
+  height: 100%;
+}
+#wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#header {
+  width: 100%;
+  min-height: 0;
+}
+#header > .item {
+  padding: 0.3em 0.8em 0.3em 0.8em;
+  margin: 0;
+  font-weight: bold;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 1s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0
+}
+.fadeIn {
+        animation: fadein 2s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.blinking {
+  animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+  50% { color: rgba(255,255,255,0.3); }
+}
+
+#wrapper {
+  overflow: auto;
+}
+
+#header {
+   -webkit-app-region:drag;
+}
+#header a {
+  -webkit-app-region: no-drag;
+}
+#header.ui.menu {
+  font-size: 0.8rem;
+}
+.ui.sortable.table thead th {
+  color: silver;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  }
+::-webkit-scrollbar-track {
+      background-color: lightgrey;
+}
+
+::-webkit-scrollbar-thumb {
+      background-color: tomato;
+}
+
+::-webkit-scrollbar-button {
+      display: none;
+      background-color: #7c2929;
+}
+
+::-webkit-scrollbar-corner {
+      background-color: teal;
+}
+
+#characterTable {
+  height: 100%;
+  font-size: 11.0px;
+}
+
+#manualInput {
+  width: 100%;
+
+}
+#manualInput > textarea {
+  max-width: 100%;
+  width: 100%;
+  color: white;
+  border: none;
+  padding: 0.2rem;
+  margin: 0;
+  font-weight: bold;
+  text-transform: uppercase;
+  resize: none;
+  max-height: 50vh;
+  background: #669999;
+}
+#nameInput > .input {
+  width: 100%;
+}
+#nameInput > .input > input {
+  background: #669999;
+  color: white;
+  text-transform: uppercase;
+  font-style: bold;
+  font-size: 1.1em;
+}
+#nameInput > .input > .button {
+  border-radius: 0;
+  color: white;
+  background: teal;
+  font-size: 1.2em;
+  text-transform: uppercase;
+    transition: background 0.3s ease;
+}
+#nameInput > .input > .button:hover {
+  background: tomato;
+}
+#characterProgressbar {
+  width: 100%;
+  z-index: 3;
+  position: absolute;
+  top: 0;
+  display: none; margin: 0; border-radius: 0; background: orange;
+}
+#characterProgressbar > .bar {
+  height: 3px; border-radius: 0; background: teal;
+}
+#settings {
+  position: absolute;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  padding: 1rem;
+}
+.slick-header-column.ui-state-default {
+  padding-top: 0.3em;
+}
+.lobibox .lobibox-body {
+  /*background: #669999;*/
+  background: white;
+  color: black;
+  padding: 1rem;
+}
+.lobibox .lobibox-body .lobibox-body-text-wrapper {
+  padding: 0;
+}
+.lobibox .lobibox-header {
+  padding: 1rem;
+}
+.lobibox.lobibox-confirm .lobibox-header {
+  padding: 0.8em;
+  background: teal;
+}
+.lobibox.lobibox-confirm .lobibox-footer {
+  padding: 0.8em;
+  background: teal;
+}
+.lobibox .lobibox-btn {
+  padding: 0.2rem 0.8rem;
+}
+#blanker {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: teal;
+  z-index: 50;
+}

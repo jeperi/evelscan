@@ -1,0 +1,24 @@
+{
+  "name": "EVE-LSCAN",
+  "version": "0.2.1",
+  "description": "EVE Online utility",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "",
+  "keywords": [
+  ],
+  "author": "",
+  "license": "MIT-License",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    "clipboardy": "^1.0.1",
+    "jquery": "^3.2.0",
+    "lru-cache": "^4.0.2",
+    "semantic-ui": "^2.2.9",
+    "vue": "^2.2.4"
+  }
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>LSCAN</title>
+
+    <script>window.$ = window.jQuery = require('jquery');</script>
+
+    <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/SlickGrid-2.3.2/slick.grid.css">
+    <link rel="stylesheet" type="text/css" href="assets/fonts.css">
+    <link rel="stylesheet" type="text/css" href="assets/table.css">
+    <link rel="stylesheet" type="text/css" href="assets/Lokibox/Lobibox.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/tooltipster/css/tooltipster.bundle.min.css" />
+    <link rel="stylesheet" type="text/css" href="assets/tooltipster/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-punk.min.css" />
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
+
+    <script src="semantic/dist/semantic.min.js"></script>
+    <script src="node_modules/vue/dist/vue.min.js"></script>
+    <script src="assets/SlickGrid-2.3.2/lib/jquery-ui-1.11.3.min.js"></script>
+    <script src="assets/SlickGrid-2.3.2/lib/jquery.event.drag-2.3.0.js"></script>
+    <script src="assets/SlickGrid-2.3.2/slick.core.js"></script>
+    <script src="assets/SlickGrid-2.3.2/slick.formatters.js"></script>
+    <script src="assets/SlickGrid-2.3.2/slick.grid.js"></script>
+    <script src="assets/Lokibox/Lobibox.js"></script>
+    <script src="assets/Lokibox/messageboxes.js"></script>
+    <script src="assets/Lokibox/notifications.js"></script>
+    <script type="text/javascript" src="assets/tooltipster/js/tooltipster.bundle.min.js"></script>
+
+    <style>
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="ui sidebar inverted vertical menu" style="background: steelblue;">
+    </div>
+    <div class="pusher" id="app">
+
+      <div v-if="blanked" class="ui active dimmer" style="position: fixed; z-index:1000;"></div>
+
+      <div v-if="loading" class="ui active dimmer" id="spinnerDimmer" style="position: fixed; display:none;">
+        <div class="ui text loader">{{ loadingText }}</div>
+      </div>
+
+      <div class="ui inverted fixed menu" id="header" style="margin: 0; border-radius: 0; z-index: 5;">
+          <a v-on:click="doScan" v-bind:class="{ blinking: scanning, green: scanning, active: scanning }" class= "item tooltip" title="Triggers scan of the names on your clipboard or the manual input window.">SCAN</a>
+          <div class="active red item draggable">EVE L-SCAN</div>
+          <a v-on:click="changeTriggerMode('auto')" v-bind:class="{ active: triggerMode == 'auto' }" class="orange item tooltip" title="Enables automatic clipboard scanning mode.">AUTO</a>
+          <a v-on:click="changeTriggerMode('manual')" v-bind:class="{ active: triggerMode == 'manual' }" class="green item tooltip" title="Enables manual input scanning mode.">MANUAL</a>
+          <a v-on:click="changeTriggerMode('shortcut')" v-bind:class="{ active: triggerMode == 'shortcut' }" class="green item tooltip" title="Enables shorcut trigger (CTRL+SHIFT+C) clipboard scanning mode.">SHORTCUT</a>
+          <a v-on:click="switchForceOnTop" v-bind:class="{ active: forceOnTop }" class="teal item tooltip" title="Forces L-SCAN to stay on as the topmost window.">ON TOP</a>
+          <a v-on:click="fitTable" class="teal item tooltip" title="Fits the table's width to the window.">FIT TABLE</a>
+          <a v-on:click="exit" class="right aligned item tooltip" title="This closes the application.">EXIT</a>
+      </div>
+
+      <div id="wrapper">
+          <div id="settings" style="display: none;">
+            <h1>SETUP</h1>
+            <hr>
+            <div style="position: fixed; bottom: 1rem; right: 1rem;" class="ui green button">Ok</div>
+          </div>
+          <div class="ui message transition hidden" style="margin: 0;">
+            <i class="close icon"></i>
+            <div class="header">
+              Welcome back!
+            </div>
+            <p v-html="message"></p>
+          </div>
+          <div id="nameInput" style="display: none;">
+            <div class="ui action input">
+              <input placeholder="Your character's name" type="text">
+              <button v-on:click="startAuto" class="ui button">Start</button>
+            </div>
+          </div>
+          <div id="manualInput" v-if="triggerMode == 'manual'">
+            <script>
+              function auto_grow(element) {
+                  element.style.height = "5px";
+                  element.style.height = (element.scrollHeight)+"px";
+              }
+            </script>
+            <textarea onkeyup="auto_grow(this)" placeholder="Manual input" type="text"></textarea>
+          </div>
+          <div class="ui teal progress" id="characterProgressbar">
+            <div class="bar"></div>
+          </div>
+          <div id="characterTable"></div>
+      </div>
+
+    </div>
+
+  </body>
+
+  <script>
+    require('./eve.js')
+  </script>
+
+</html>
