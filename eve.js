@@ -331,7 +331,7 @@ $( document ).ready(function() {
           soundPath: 'assets/sounds/',
           icon: false,
           position: 'center top', //or 'center bottom'
-          msg: "It's not recommended to scan this many characters at once."
+          msg: "It's not recommended to scan this many characters at once, at least not now."
         });
       }
 
@@ -407,7 +407,13 @@ $( document ).ready(function() {
         a.characterName = name;
         $("#nameInput").slideUp();
       } else {
-        alert("I do not believe that's your name. It's used as a trigger, so please type it in.");
+        Lobibox.notify('warning', {
+          soundPath: 'assets/sounds/',
+          icon: false,
+          position: 'center top', //or 'center bottom'
+          msg: "The name is used as a trigger to know when the clipboard should be analyzed, as the local chat window contact list always contains that."
+        });
+        return;
       }
     },
     changeTriggerMode: function(mode) {
@@ -449,6 +455,13 @@ $( document ).ready(function() {
 
   var app = new Vue({ el: '#app', data: a, methods: aMethods });
   charManager.init();
+
+  setInterval(function() {
+    if (a.triggerMode == 'auto') {
+      console.log("autoscan");
+      aMethods.doScan();
+    }
+  }, 1000);
 
   /*
   // This seemed less laggy than binding to the resize event
