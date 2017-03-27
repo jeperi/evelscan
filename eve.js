@@ -148,6 +148,7 @@ $( document ).ready(function() {
         if (indices[key] != undefined) indices[key].length = 0;
       });
     }
+
     function generateIndices() {
       clearIndices();
       var columnCount = 0;
@@ -391,65 +392,57 @@ $( document ).ready(function() {
 
   // VUE.js //////////////////////////////////////////////////////////////////////////////
 
-  // Vue.js methods
-  var aMethods = {
-    exit: function() {
-      remote.getCurrentWindow().close()
-    },
-    switchForceOnTop: function() {
-      a.forceOnTop = !a.forceOnTop;
-      remote.getCurrentWindow().setAlwaysOnTop(a.forceOnTop);
-    },
-    startAuto: function() {
-      var name = $("#nameInput > div > input").val();
-      if (name.length > 3) {
-        a.triggerMode = 'auto';
-        a.characterName = name;
-        $("#nameInput").slideUp();
-      } else {
-        Lobibox.notify('warning', {
-          soundPath: 'assets/sounds/',
-          icon: false,
-          position: 'center top', //or 'center bottom'
-          msg: "The name is used as a trigger to know when the clipboard should be analyzed, as the local chat window contact list always contains that."
-        });
-        return;
-      }
-    },
-    changeTriggerMode: function(mode) {
-      if (mode == 'auto') {
-        if (a.triggerMode != 'off') {
-          a.triggerMode = 'off';
-          $("#nameInput").slideDown();
-          return;
-        } else if (a.triggerMode == 'off') {
-          mode = 'shortcut';
-        }
-      } else if (mode == 'manual') {
-        if (a.triggerMode == 'manual') {
-          mode = 'shortcut';
-        }
-      }
-      a.triggerMode = mode;
+  aMethods.switchForceOnTop = function() {
+    a.forceOnTop = !a.forceOnTop;
+    remote.getCurrentWindow().setAlwaysOnTop(a.forceOnTop);
+  };
+  aMethods.startAuto = function() {
+    var name = $("#nameInput > div > input").val();
+    if (name.length > 3) {
+      a.triggerMode = 'auto';
+      a.characterName = name;
       $("#nameInput").slideUp();
-    },
-    doScan: function() {
-      switch(a.triggerMode) {
-        case "manual":
-          processCharacters($("#manualInput > textarea").val());
-          break;
-        default:
-          var input = clipboardy.readSync();
-          if (input === a.lastInput) return;
-          a.lastInput = input;
-          return processCharacters(input);
-      };
-    },
-    fitTable: function() {
-      charManager.autosize();
+    } else {
+      Lobibox.notify('warning', {
+        soundPath: 'assets/sounds/',
+        icon: false,
+        position: 'center top', //or 'center bottom'
+        msg: "The name is used as a trigger to know when the clipboard should be analyzed, as the local chat window contact list always contains that."
+      });
+      return;
     }
   };
-
+  aMethods.changeTriggerMode = function(mode) {
+    if (mode == 'auto') {
+      if (a.triggerMode != 'off') {
+        a.triggerMode = 'off';
+        $("#nameInput").slideDown();
+        return;
+      } else if (a.triggerMode == 'off') {
+        mode = 'shortcut';
+      }
+    } else if (mode == 'manual') {
+      if (a.triggerMode == 'manual') {
+        mode = 'shortcut';
+      }
+    }
+    a.triggerMode = mode;
+    $("#nameInput").slideUp();
+  };
+  aMethods.doScan = function() {
+    switch(a.triggerMode) {
+      case "manual":
+        processCharacters($("#manualInput > textarea").val());
+        break;
+      default:
+        var input = clipboardy.readSync();
+        if (input === a.lastInput) return;
+        a.lastInput = input;
+        return processCharacters(input);
+    };
+  };
+  aMethods.fitTable = function() { charManager.autosize(); };
+  aMethods.exit = function() { remote.getCurrentWindow().close(); };
   aMethods.startSpinning = function(text){ a.loading = true; a.loadingText = text; }
   aMethods.stopSpinning =  function(){ a.loading = false; a.loadingText = "Loading.."; }
 
@@ -462,20 +455,6 @@ $( document ).ready(function() {
       aMethods.doScan();
     }
   }, 1000);
-
-  /*
-  // This seemed less laggy than binding to the resize event
-  var lastWidth = $(window).width();
-  var lastHeight = $(window).height();
-  setInterval(function() {
-    var newWidth = $(window).width();
-    var newHeight = $(window).height();
-    if (newWidth != lastWidth || newHeight != lastHeight) {
-      grid.autosizeColumns();
-      grid.resizeCanvas();
-    }
-  }, 1000);
-  */
 
   const globalShortcut = remote.getGlobal("globalShortcut");
   const ret = globalShortcut.register('CommandOrControl+Shift+C', () => { if (a.triggerMode == 'shortcut') aMethods.doScan(); })
