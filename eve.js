@@ -141,8 +141,9 @@ $( document ).ready(function() {
         corporationColors[value] = hue;
       }
       var count = corporations[getItem(row).corporation_id];
-      if (value != '') return '('+count+') <span style="color: ' + corporationColors[value] + '">' + value + '</span>';
-      return ' - - - ';
+      if (value != '' && count != undefined) return '('+count+') <span style="color: ' + corporationColors[value] + '">' + value + '</span>';
+      else if (count == undefined) return '<span style="color: ' + corporationColors[value] + '">' + value + '</span>';
+      else return ' - - - ';
     }
 
     var allianceColors = {};
@@ -152,8 +153,9 @@ $( document ).ready(function() {
         allianceColors[value] = hue;
       }
       var count = alliances[getItem(row).alliance_id];
-      if (value != '') return '('+count+') <span style="color: ' + allianceColors[value] + '">' + value + '</span>';
-      return ' - - - ';
+      if (value != '' && count != undefined) return '('+count+') <span style="color: ' + allianceColors[value] + '">' + value + '</span>';
+      else if (count == undefined) return '<span style="color: ' + allianceColors[value] + '">' + value + '</span>';
+      else return ' - - - ';
     }
 
     var grid;
