@@ -8,6 +8,8 @@ $( document ).ready(function() {
   const clipboardy = require('clipboardy');
   const LRU = require("lru-cache");
   const shell = require('electron').shell;
+  const path = require('path')
+  const url = require('url')
   //var fs = require('fs');
   //var packageData = JSON.parse(fs.readFileSync('package.json', 'utf8'));
   packageData = require('./package.json');
@@ -125,14 +127,37 @@ $( document ).ready(function() {
 
   var charManager = (function(charData) {
 
+    function selectColor(colorNum, colors){
+        if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
+        return "hsl(" + (colorNum * (360 / colors) % 360) + ",100%,50%)";
+    }
+
+    var corporationColors = {};
+    function corporationFormatter(row, cell, value, columnDef, dataContext) {
+      if (corporationColors[value] == undefined) {
+        var hue = randomColor({luminosity: 'light'});
+        corporationColors[value] = hue;
+      }
+      return '<span style="color: ' + corporationColors[value] + '">' + value + '</span>';
+    }
+
+    var allianceColors = {};
+    function allianceFormatter(row, cell, value, columnDef, dataContext) {
+      if (allianceColors[value] == undefined) {
+        var hue = randomColor({luminosity: 'light'});
+        allianceColors[value] = hue;
+      }
+      return '<span style="color: ' + allianceColors[value] + '">' + value + '</span>';
+    }
+
     var grid;
     var gridColumns =
     [
       { id: "name", name: "Name", field: "name", width: 100, minWidth: 90, sortable: true},
       { id: "characterAgeYears", name: "Age", field: "characterAgeYears", width: 10, minWidth: 20, sortable: true, toolTip: "Character's age in years." },
       { id: "securityStatus", name: "Sec", field: "securityStatus", width: 10, minWidth: 20, sortable: true, toolTip: "Character's security status." },
-      { id: "corporation_name", name: "Corp", field: "corporation_name", width: 100, minWidth: 20, sortable: true, toolTip: "Name of the corporation the character is in." },
-      { id: "alliance_name", name: "Alliance", field: "alliance_name", width: 100, minWidth: 20, sortable: true , toolTip: "Name of the alliance the character is in."},
+      { id: "corporation_name", name: "Corp", field: "corporation_name", width: 100, minWidth: 20, sortable: true, toolTip: "Name of the corporation the character is in.", formatter: corporationFormatter },
+      { id: "alliance_name", name: "Alliance", field: "alliance_name", width: 100, minWidth: 20, sortable: true , toolTip: "Name of the alliance the character is in.", formatter: allianceFormatter},
       { id: "shipsDestroyed", name: "K", field: "shipsDestroyed", width: 10, minWidth: 20, sortable: true, toolTip: "Number of destroyed ships." },
       { id: "shipsLost", name: "D", field: "shipsLost", width: 10, minWidth: 20, sortable: true , toolTip: "Number of how many ships the character has lost."},
       { id: "KD", name: "K/D", field: "KD", width: 10, minWidth: 20, sortable: true , toolTip: "Kill/death ratio."},
@@ -185,7 +210,7 @@ $( document ).ready(function() {
     }
 
     function add(data) { charData.push(data); grid.resizeCanvas(); grid.render(); indicesGenerated = false; }
-    function clear()   { grid.invalidateAllRows(); indices.length = 0; charData.length = 0; indicesGenerated = false; }
+    function clear()   { grid.invalidateAllRows(); indices.length = 0; charData.length = 0; corporationColors = {}; allianceColors = {}; indicesGenerated = false; }
     function scrollDown() { var win = $(".slick-viewport"); var height = win[0].scrollHeight; win.scrollTop(height*2); }
     function scrollUp() { var win = $(".slick-viewport"); win.scrollTop(0); }
     function autosize() { if (grid != undefined) { grid.resizeCanvas(); grid.autosizeColumns(); } };
@@ -254,6 +279,19 @@ $( document ).ready(function() {
         var cell = grid.getCellFromEvent(e);
         var column = grid.getColumns()[cell.cell];
         console.log(column);
+        return;
+        let win = new remote.BrowserWindow({width: 400, height: 250, frame: false});
+        win.on('closed', () => {
+          win = null
+        });
+        win.loadURL(url.format({
+          pathname: path.join(__dirname, 'details.html'),
+          protocol: 'file:',
+          slashes: true
+        }))
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('message', charData[cell.row]);
+        });
       });
 
       grid.onDblClick.subscribe(function (e) {
