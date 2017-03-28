@@ -132,13 +132,22 @@ $( document ).ready(function() {
         return "hsl(" + (colorNum * (360 / colors) % 360) + ",100%,50%)";
     }
 
+    var corporations = {};
+    var alliances = {};
+    var indices = []; var indicesGenerated = false; var currentSortCol; var isAsc = true; var sorted = false;
+
+    function getItem(index) { if (!indicesGenerated || !sorted) { return charData[index]; } return isAsc ? charData[indices[currentSortCol.field][index]] : charData[indices[currentSortCol.field][(charData.length - 1) - index]]; }
+    function getLength() { return charData.length; }
+
     var corporationColors = {};
     function corporationFormatter(row, cell, value, columnDef, dataContext) {
       if (corporationColors[value] == undefined) {
         var hue = randomColor({luminosity: 'light'});
         corporationColors[value] = hue;
       }
-      return '<span style="color: ' + corporationColors[value] + '">' + value + '</span>';
+      var count = corporations[getItem(row).corporation_id];
+      if (value != '') return '('+count+') <span style="color: ' + corporationColors[value] + '">' + value + '</span>';
+      return ' - - - ';
     }
 
     var allianceColors = {};
@@ -147,7 +156,9 @@ $( document ).ready(function() {
         var hue = randomColor({luminosity: 'light'});
         allianceColors[value] = hue;
       }
-      return '<span style="color: ' + allianceColors[value] + '">' + value + '</span>';
+      var count = alliances[getItem(row).alliance_id];
+      if (value != '') return '('+count+') <span style="color: ' + allianceColors[value] + '">' + value + '</span>';
+      return ' - - - ';
     }
 
     var grid;
@@ -165,7 +176,6 @@ $( document ).ready(function() {
     ];
 
     var gridOptions = { enableCellNavigation: false, enableColumnReorder: true, rowHeight: 18 };
-    var indices = []; var indicesGenerated = false; var currentSortCol; var isAsc = true; var sorted = false;
 
     function clearIndices() {
       gridColumns.forEach(function(column) {
@@ -192,30 +202,28 @@ $( document ).ready(function() {
     }
 
     function updateCounters() {
-      var corporations = {};
-      var alliances = {};
+      corporations = {};
+      alliances = {};
       for (var i = 0; i < charData.length; i++) {
         if (!(charData[i].corporation_id in corporations)) corporations[charData[i].corporation_id] = 1;
         else corporations[charData[i].corporation_id] = corporations[charData[i].corporation_id] + 1;
       }
-      for (var i = 0; i < charData.length; i++) { charData[i].corporation_name = "(" + corporations[charData[i].corporation_id] + ") " + charData[i].corporation_name; }
+      //for (var i = 0; i < charData.length; i++) { charData[i].corporation_name = "(" + corporations[charData[i].corporation_id] + ") " + charData[i].corporation_name; }
       for (var i = 0; i < charData.length; i++) {
         if (!(charData[i].alliance_id in alliances)) alliances[charData[i].alliance_id] = 1;
         else alliances[charData[i].alliance_id] = alliances[charData[i].alliance_id] + 1;
       }
-      for (var i = 0; i < charData.length; i++) { charData[i].alliance_name = "(" + alliances[charData[i].alliance_id] + ") " + charData[i].alliance_name; }
+      //for (var i = 0; i < charData.length; i++) { charData[i].alliance_name = "(" + alliances[charData[i].alliance_id] + ") " + charData[i].alliance_name; }
       grid.invalidateAllRows();
       grid.render();
 
     }
 
     function add(data) { charData.push(data); grid.resizeCanvas(); grid.render(); indicesGenerated = false; }
-    function clear()   { grid.invalidateAllRows(); indices.length = 0; charData.length = 0; corporationColors = {}; allianceColors = {}; indicesGenerated = false; }
+    function clear()   { grid.invalidateAllRows(); indices.length = 0; charData.length = 0; corporations = {}; alliances = {}; corporationColors = {}; allianceColors = {}; indicesGenerated = false; }
     function scrollDown() { var win = $(".slick-viewport"); var height = win[0].scrollHeight; win.scrollTop(height*2); }
     function scrollUp() { var win = $(".slick-viewport"); win.scrollTop(0); }
     function autosize() { if (grid != undefined) { grid.resizeCanvas(); grid.autosizeColumns(); } };
-    function getItem(index) { if (!indicesGenerated || !sorted) { return charData[index]; } return isAsc ? charData[indices[currentSortCol.field][index]] : charData[indices[currentSortCol.field][(charData.length - 1) - index]]; }
-    function getLength() { return charData.length; }
 
     function highlighter() {
       var colored = [];
