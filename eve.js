@@ -127,11 +127,6 @@ $( document ).ready(function() {
 
   var charManager = (function(charData) {
 
-    function selectColor(colorNum, colors){
-        if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
-        return "hsl(" + (colorNum * (360 / colors) % 360) + ",100%,50%)";
-    }
-
     var corporations = {};
     var alliances = {};
     var indices = []; var indicesGenerated = false; var currentSortCol; var isAsc = true; var sorted = false;
@@ -383,7 +378,8 @@ $( document ).ready(function() {
       }
 
       for (var i = 0; i < list.length; i++) {
-        if (list[i].trim().length > 32) return;
+        if (list[i].trim().length < 3) return;
+        if (list[i].trim().length > 37) return;
       }
 
       if (a.triggerMode == 'auto') {
