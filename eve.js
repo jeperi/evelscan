@@ -302,9 +302,9 @@ $( document ).ready(function() {
       grid.onDblClick.subscribe(function (e) {
         var cell = grid.getCellFromEvent(e);
         var column = grid.getColumns()[cell.cell];
-        if (column.id === 'name') shell.openExternal("https://zkillboard.com/character/" + charData[cell.row].character_id + "/");
-        else if (column.id === 'corporation_name') shell.openExternal("https://zkillboard.com/corporation/" + charData[cell.row].corporation_id + "/");
-        else if (column.id === 'alliance_name') shell.openExternal("https://zkillboard.com/alliance/" + charData[cell.row].alliance_id + "/");
+        if (column.id === 'name') shell.openExternal("https://zkillboard.com/character/" + getItem(cell.row).character_id + "/");
+        else if (column.id === 'corporation_name') shell.openExternal("https://zkillboard.com/corporation/" + getItem(cell.row).corporation_id + "/");
+        else if (column.id === 'alliance_name') shell.openExternal("https://zkillboard.com/alliance/" + getItem(cell.row).alliance_id + "/");
       });
 
       highlighter();
