@@ -48,10 +48,11 @@ $( document ).ready(function() {
   // API //////////////////////////////////////////////////////////////////////////////
 
 
-  const apiThrottle = 2500;
+  const apiThrottle = 50;
   const apiRetry = 5000;
-  const apiTimeout = 10000;
-  const apiDelay = 1000;
+  const apiTimeout = 20000;
+  const apiDelay = 5000;
+  const apiMinDelay = 500;
   const apiHeaders = {"LSCAN-Version": version};
 
   var apiURL = "https://d2ae92mc3qt5hn.cloudfront.net/api";
@@ -62,34 +63,53 @@ $( document ).ready(function() {
   var apiManager = (function() {
 
     var requests = [];
-    var timeout;
+    var timeout = 0;
     var done = true;
     var complete;
-
+    var counter = 0;
+    
+    setInterval(function() {
+        if (counter > 0) {
+            counter--;
+            console.log("Current delay: " + counter*apiThrottle);
+        }
+    }, apiDelay);
 
     function run() {
       var self = this;
-      var origComplete;
+      //var origComplete;
 
       if (requests.length) {
         done = false;
+        
+        counter++;
+        delay = apiThrottle*counter;
+        if (delay > apiDelay) delay = apiDelay;
+        if (delay < apiMinDelay) delay = apiMinDelay;
+        
         var origComplete = requests[0].complete;
-        requests[0].complete = function() {
-          if (typeof(origComplete) === 'function') origComplete();
-          requests.shift();
-          $('#characterProgressbar').progress('increment');
-          run.apply(self, []);
-        };
-        $.ajax(requests[0]);
+        
+        timeout = setTimeout(function() {
+            console.log("Remaining ", requests.length);
+            requests[0].complete = function() {
+                if (typeof(origComplete) === 'function') origComplete();
+                requests.shift();
+                $('#characterProgressbar').progress('increment');
+                run.apply(self, []);
+            }
+
+            $.ajax(requests[0]);
+        }, delay);
+
       } else {
         if (!done) {
           setTimeout(function() {$('#characterProgressbar').slideUp()}, 1000);
           if (typeof(complete) === 'function') complete();
         }
         done = true;
-        timeout = setTimeout(function() {
-          run.apply(self, []);
-        }, apiDelay);
+        //timeout = setTimeout(function() {
+        //  run.apply(self, []);
+        //}, apiDelay);
       }
     }
 
@@ -103,6 +123,7 @@ $( document ).ready(function() {
         }
       },
       clear: function() {
+        console.log("Queue cleared.");
         requests.length = 0;
         requests = [];
       },
@@ -114,10 +135,9 @@ $( document ).ready(function() {
         run();
       },
       stop: function() {
-        requests.length = 0;
-        requests = [];
-        done = true;
+        console.log("Stopping queue!");
         clearTimeout(timeout);
+        done = true;
       }
     }
   }());
@@ -233,7 +253,9 @@ $( document ).ready(function() {
     
     function saveOldFriends() {
        for (var i = 0; i < charData.length; i++) {
-        oldFriends.push(charData[i].name);
+        if (!oldFriends.includes(charData[i].name)) {
+            oldFriends.push(charData[i].name);
+        }
       }
     }
 
@@ -339,11 +361,13 @@ $( document ).ready(function() {
       var retry = function(baseDelay) {
         var delay = baseDelay * Math.random();
         var timeout = setTimeout(function() {
+          console.log("Retrying " + name);
           getCharacterData(name, callback);
         }, delay);
       }
 
       var success = function(data) {
+        cache.set(data.name, data);
         if (spinning) aMethods.stopSpinning();
         spinning = false;
         return callback(data);
@@ -364,9 +388,9 @@ $( document ).ready(function() {
             case 404:
               return success(data);
             case 500:
-              return success(data);
+              return retry(apiDelay);
             case 429:
-              return retry(apiThrottle);
+              return retry(apiDelay);
             default:
               if (xhr.statusText == 'abort') return;
               spinning = true;
@@ -375,8 +399,14 @@ $( document ).ready(function() {
           }
         }
       }
-
-      apiManager.addRequest(request);
+      
+      var data = cache.get(name);
+      if (data) {
+        //console.log("Cached: " + name);
+        success(data);
+      } else {
+        apiManager.addRequest(request);
+      }
 
     };
 
@@ -421,6 +451,7 @@ $( document ).ready(function() {
       apiManager.stop();
       saveOldFriends();
       clear();
+      apiManager.clear();
 
       for (var i = 0; i < list.length; i++) {
         var name = list[i].trim().toLowerCase();
@@ -431,7 +462,9 @@ $( document ).ready(function() {
           data.KD = Math.round( data.KD * 10 ) / 10;
           
           if (data.status != undefined) {
-              data.name = '***' + data.name + "***";
+              if (data.name.indexOf("***") == -1) {
+                data.name = '*** ' + data.name + " ***";  
+              }
               data.shipsDestroyed = 0
               data.shipsLost = 0
               data.soloKills = 0
