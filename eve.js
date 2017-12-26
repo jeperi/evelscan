@@ -54,7 +54,7 @@ $( document ).ready(function() {
   const apiDelay = 1000;
   const apiHeaders = {"LSCAN-Version": version};
 
-  var apiURL = "http://51.15.49.79/public";
+  var apiURL = "https://d2ae92mc3qt5hn.cloudfront.net/api";
 
   var cacheOptions = { max: 2000, maxAge: 1000*60*10 }; // Cache everything for 10 minutes
   const cache = LRU(cacheOptions);
@@ -140,7 +140,7 @@ $( document ).ready(function() {
         var hue = randomColor({luminosity: 'light'});
         corporationColors[value] = hue;
       }
-      var count = corporations[getItem(row).corporation_id];
+      var count = corporations[getItem(row).corporationID];
       if (value != '' && count != undefined) return '('+count+') <span style="color: ' + corporationColors[value] + '">' + value + '</span>';
       else if (count == undefined) return '<span style="color: ' + corporationColors[value] + '">' + value + '</span>';
       else return ' - - - ';
@@ -152,20 +152,27 @@ $( document ).ready(function() {
         var hue = randomColor({luminosity: 'light'});
         allianceColors[value] = hue;
       }
-      var count = alliances[getItem(row).alliance_id];
+      var count = alliances[getItem(row).allianceID];
       if (value != '' && count != undefined) return '('+count+') <span style="color: ' + allianceColors[value] + '">' + value + '</span>';
       else if (count == undefined) return '<span style="color: ' + allianceColors[value] + '">' + value + '</span>';
       else return ' - - - ';
+    }
+    
+    function nameFormatter(row, cell, value, columnDef, dataContext) {
+        if (value.indexOf("***") !== -1) {
+            return '<b style="color: tomato">' + value + "</b>";
+        }
+        return value;
     }
 
     var grid;
     var gridColumns =
     [
-      { id: "name", name: "Name", field: "name", width: 100, minWidth: 90, sortable: true},
+      { id: "name", name: "Name", field: "name", width: 100, minWidth: 90, sortable: true, formatter: nameFormatter},
       { id: "characterAgeYears", name: "Age", field: "characterAgeYears", width: 10, minWidth: 20, sortable: true, toolTip: "Character's age in years." },
       { id: "securityStatus", name: "Sec", field: "securityStatus", width: 10, minWidth: 20, sortable: true, toolTip: "Character's security status." },
-      { id: "corporation_name", name: "Corp", field: "corporation_name", width: 100, minWidth: 20, sortable: true, toolTip: "Name of the corporation the character is in.", formatter: corporationFormatter },
-      { id: "alliance_name", name: "Alliance", field: "alliance_name", width: 100, minWidth: 20, sortable: true , toolTip: "Name of the alliance the character is in.", formatter: allianceFormatter},
+      { id: "corporationName", name: "Corp", field: "corporationName", width: 100, minWidth: 20, sortable: true, toolTip: "Name of the corporation the character is in.", formatter: corporationFormatter },
+      { id: "allianceName", name: "Alliance", field: "allianceName", width: 100, minWidth: 20, sortable: true , toolTip: "Name of the alliance the character is in.", formatter: allianceFormatter},
       { id: "shipsDestroyed", name: "K", field: "shipsDestroyed", width: 10, minWidth: 20, sortable: true, toolTip: "Number of destroyed ships." },
       { id: "shipsLost", name: "D", field: "shipsLost", width: 10, minWidth: 20, sortable: true , toolTip: "Number of how many ships the character has lost."},
       { id: "KD", name: "K/D", field: "KD", width: 10, minWidth: 20, sortable: true , toolTip: "Kill/death ratio."},
@@ -202,15 +209,15 @@ $( document ).ready(function() {
       corporations = {};
       alliances = {};
       for (var i = 0; i < charData.length; i++) {
-        if (!(charData[i].corporation_id in corporations)) corporations[charData[i].corporation_id] = 1;
-        else corporations[charData[i].corporation_id] = corporations[charData[i].corporation_id] + 1;
+        if (!(charData[i].corporationID in corporations)) corporations[charData[i].corporationID] = 1;
+        else corporations[charData[i].corporationID] = corporations[charData[i].corporationID] + 1;
       }
-      //for (var i = 0; i < charData.length; i++) { charData[i].corporation_name = "(" + corporations[charData[i].corporation_id] + ") " + charData[i].corporation_name; }
+      //for (var i = 0; i < charData.length; i++) { charData[i].corporationName = "(" + corporations[charData[i].corporationID] + ") " + charData[i].corporationName; }
       for (var i = 0; i < charData.length; i++) {
-        if (!(charData[i].alliance_id in alliances)) alliances[charData[i].alliance_id] = 1;
-        else alliances[charData[i].alliance_id] = alliances[charData[i].alliance_id] + 1;
+        if (!(charData[i].allianceID in alliances)) alliances[charData[i].allianceID] = 1;
+        else alliances[charData[i].allianceID] = alliances[charData[i].allianceID] + 1;
       }
-      //for (var i = 0; i < charData.length; i++) { charData[i].alliance_name = "(" + alliances[charData[i].alliance_id] + ") " + charData[i].alliance_name; }
+      //for (var i = 0; i < charData.length; i++) { charData[i].allianceName = "(" + alliances[charData[i].allianceID] + ") " + charData[i].allianceName; }
       grid.invalidateAllRows();
       grid.render();
 
@@ -302,9 +309,9 @@ $( document ).ready(function() {
       grid.onDblClick.subscribe(function (e) {
         var cell = grid.getCellFromEvent(e);
         var column = grid.getColumns()[cell.cell];
-        if (column.id === 'name') shell.openExternal("https://zkillboard.com/character/" + getItem(cell.row).character_id + "/");
-        else if (column.id === 'corporation_name') shell.openExternal("https://zkillboard.com/corporation/" + getItem(cell.row).corporation_id + "/");
-        else if (column.id === 'alliance_name') shell.openExternal("https://zkillboard.com/alliance/" + getItem(cell.row).alliance_id + "/");
+        if (column.id === 'name') shell.openExternal("https://zkillboard.com/character/" + getItem(cell.row).characterID + "/");
+        else if (column.id === 'corporationName') shell.openExternal("https://zkillboard.com/corporation/" + getItem(cell.row).corporationID + "/");
+        else if (column.id === 'allianceName') shell.openExternal("https://zkillboard.com/alliance/" + getItem(cell.row).allianceID + "/");
       });
 
       highlighter();
@@ -403,16 +410,33 @@ $( document ).ready(function() {
       for (var i = 0; i < list.length; i++) {
         var name = list[i].trim().toLowerCase();
         getCharacterData(name, function(data) {
-          $('#characterProgressbar').progress("increment");
+          //$('#characterProgressbar').progress("increment");
           data.name = data.name.toUpperCase();
-          data.securityStatus = Math.round( data.security_status * 10 ) / 10;
-          if (data.status != undefined) data.name = "**" + data.name + "**";
+          data.securityStatus = Math.round( data.securityStatus * 10 ) / 10;
           data.KD = Math.round( data.KD * 10 ) / 10;
-          data.characterAgeYears = Math.round( data.character_age/365 * 10 ) / 10;
+          
+          if (data.status != undefined) {
+              data.name = '***' + data.name + "***";
+              data.shipsDestroyed = 0
+              data.shipsLost = 0
+              data.soloKills = 0
+              data.KD = 0
+          }
+          
+          data.characterAgeYears = Math.round( data.age/365 * 10 ) / 10;
+          
+          if (data.corporationName == undefined)
+              data.corporationName = "--"
+          if (data.allianceName == undefined)
+              data.allianceName = "--"
+          
+          
           add(data);
           if(!document.hasFocus()) scrollDown();
         });
       }
+      
+      
 
       apiManager.start(function() {
         autosize();
@@ -505,7 +529,7 @@ $( document ).ready(function() {
 
   function versionCheck() {
     var request = {
-      url: "http://51.15.49.79/test/",
+      url: "https://d2ae92mc3qt5hn.cloudfront.net/status/version",
       method: 'GET',
       dataType: 'json',
       timeout: apiTimeout,
@@ -519,6 +543,16 @@ $( document ).ready(function() {
             soundSrc: "/assets/sounds/",
             title: "A new update is available.",
             msg: 'There is a new version available for download <a href="https://github.com/jeperi/evelscan/releases">here</a>.<br>'
+          });
+        }
+        if (data.status !== 'OK') {
+            Lobibox.alert('info',
+          {
+            icon: false,
+            sound: true,
+            soundSrc: "/assets/sounds/",
+            title: "Backend status message.",
+            msg: 'Status: ' + data.status
           });
         }
         aMethods.stopSpinning();
