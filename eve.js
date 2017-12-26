@@ -127,6 +127,7 @@ $( document ).ready(function() {
 
   var charManager = (function(charData) {
 
+    var oldFriends = [];
     var corporations = {};
     var alliances = {};
     var indices = []; var indicesGenerated = false; var currentSortCol; var isAsc = true; var sorted = false;
@@ -159,8 +160,15 @@ $( document ).ready(function() {
     }
     
     function nameFormatter(row, cell, value, columnDef, dataContext) {
-        if (value.indexOf("***") !== -1) {
+        if (oldFriends.includes(value)) {
+            if (value.indexOf("***") !== -1) {
+                return '<i style="color: tomato">' + value + "</i>";
+            }
             return '<b style="color: tomato">' + value + "</b>";
+        }
+        
+        if (value.indexOf("***") !== -1) {
+            return '<i style="color: black">' + value + "</i>";
         }
         return value;
     }
@@ -221,6 +229,12 @@ $( document ).ready(function() {
       grid.invalidateAllRows();
       grid.render();
 
+    }
+    
+    function saveOldFriends() {
+       for (var i = 0; i < charData.length; i++) {
+        oldFriends.push(charData[i].name);
+      }
     }
 
     function add(data) { charData.push(data); grid.resizeCanvas(); grid.render(); indicesGenerated = false; }
@@ -405,6 +419,7 @@ $( document ).ready(function() {
       a.scanning = true;
 
       apiManager.stop();
+      saveOldFriends();
       clear();
 
       for (var i = 0; i < list.length; i++) {
