@@ -57,7 +57,7 @@ $( document ).ready(function() {
 
   var apiURL = "https://d2ae92mc3qt5hn.cloudfront.net/api";
 
-  var cacheOptions = { max: 2000, maxAge: 1000*60*10 }; // Cache everything for 10 minutes
+  var cacheOptions = { max: 2000, maxAge: 1000*60*120 }; // Cache everything for 120 minutes
   const cache = LRU(cacheOptions);
 
   var apiManager = (function() {
