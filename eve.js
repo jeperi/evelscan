@@ -47,17 +47,17 @@ $( document ).ready(function() {
 
   // API //////////////////////////////////////////////////////////////////////////////
 
-
   const apiThrottle = 50;
   const apiRetry = 5000;
   const apiTimeout = 20000;
-  const apiDelay = 5000;
-  const apiMinDelay = 500;
+  const apiDelay = 3000;
+  const apiMinDelay = 0;
   const apiHeaders = {"LSCAN-Version": version};
+  var runNumber = 0;
 
-  var apiURL = "https://d2ae92mc3qt5hn.cloudfront.net/api";
+  var apiURL = "http://d2ae92mc3qt5hn.cloudfront.net/api";
 
-  var cacheOptions = { max: 2000, maxAge: 1000*60*120 }; // Cache everything for 120 minutes
+  var cacheOptions = { max: 2000, maxAge: 1000*60*60*1 }; // Cache everything for 1 hour
   const cache = LRU(cacheOptions);
 
   var apiManager = (function() {
@@ -87,17 +87,32 @@ $( document ).ready(function() {
         if (delay > apiDelay) delay = apiDelay;
         if (delay < apiMinDelay) delay = apiMinDelay;
         
+        var request = requests[0];
         var origComplete = requests[0].complete;
+        var origSuccess = requests[0].success;
+
+        requests[0].complete = function() {
+            if (typeof(origComplete) === 'function') origComplete();
+            requests.shift();
+            $('#characterProgressbar').progress('increment');
+            run.apply(self, []);
+        }
+        
+        requests[0].success = function(data) {
+            if (data.update == 0) {
+                console.log("Forgiving 1 count")
+                counter--;
+            }
+
+            if (runNumber != request.runNumber) {
+                return
+            }
+            
+            if (typeof(origSuccess) === 'function') origSuccess(data);
+        }
         
         timeout = setTimeout(function() {
             console.log("Remaining ", requests.length);
-            requests[0].complete = function() {
-                if (typeof(origComplete) === 'function') origComplete();
-                requests.shift();
-                $('#characterProgressbar').progress('increment');
-                run.apply(self, []);
-            }
-
             $.ajax(requests[0]);
         }, delay);
 
@@ -115,6 +130,9 @@ $( document ).ready(function() {
 
     return {
       addRequest: function(options) {
+        var curRun = runNumber;
+        options.runNumber = curRun;
+        console.log(curRun);
         requests.push(options);
       },
       removeRequest: function(options) {
@@ -128,8 +146,8 @@ $( document ).ready(function() {
         requests = [];
       },
       start: function(callback) {
-        $("#characterProgressbar").slideDown().progress({ total: requests.length });
-        console.log("Starting api requests", requests.length);
+        $("#characterProgressbar").slideDown().progress({ total: requests.length }); 
+        console.log("Starting api requests", requests.length, "for run", runNumber);
         done = false;
         complete = callback;
         run();
@@ -147,7 +165,6 @@ $( document ).ready(function() {
 
   var charManager = (function(charData) {
 
-    var oldFriends = [];
     var corporations = {};
     var alliances = {};
     var indices = []; var indicesGenerated = false; var currentSortCol; var isAsc = true; var sorted = false;
@@ -180,7 +197,7 @@ $( document ).ready(function() {
     }
     
     function nameFormatter(row, cell, value, columnDef, dataContext) {
-        if (oldFriends.includes(value)) {
+        if (cache.get(value.toLowerCase()) != undefined) {
             if (value.indexOf("***") !== -1) {
                 return '<i style="color: tomato">' + value + "</i>";
             }
@@ -253,13 +270,16 @@ $( document ).ready(function() {
     
     function saveOldFriends() {
        for (var i = 0; i < charData.length; i++) {
-        if (!oldFriends.includes(charData[i].name)) {
-            oldFriends.push(charData[i].name);
-        }
-      }
+         cache.set(charData[i].name.toLowerCase(), charData[i]);
+       }
     }
 
-    function add(data) { charData.push(data); grid.resizeCanvas(); grid.render(); indicesGenerated = false; }
+    function add(data) {
+        for (var i = 0; i < charData.length; i++) {
+            if (charData[i].name === data.name) return
+        }
+        charData.push(data); grid.resizeCanvas(); grid.render(); indicesGenerated = false; 
+    }
     function clear()   { grid.invalidateAllRows(); indices.length = 0; charData.length = 0; corporations = {}; alliances = {}; corporationColors = {}; allianceColors = {}; indicesGenerated = false; }
     function scrollDown() { var win = $(".slick-viewport"); var height = win[0].scrollHeight; win.scrollTop(height*2); }
     function scrollUp() { var win = $(".slick-viewport"); win.scrollTop(0); }
@@ -359,6 +379,7 @@ $( document ).ready(function() {
       var spinning = false;
 
       var retry = function(baseDelay) {
+        return
         var delay = baseDelay * Math.random();
         var timeout = setTimeout(function() {
           console.log("Retrying " + name);
@@ -367,7 +388,6 @@ $( document ).ready(function() {
       }
 
       var success = function(data) {
-        cache.set(data.name, data);
         if (spinning) aMethods.stopSpinning();
         spinning = false;
         return callback(data);
@@ -401,8 +421,8 @@ $( document ).ready(function() {
       }
       
       var data = cache.get(name);
+
       if (data) {
-        //console.log("Cached: " + name);
         success(data);
       } else {
         apiManager.addRequest(request);
@@ -452,6 +472,8 @@ $( document ).ready(function() {
       saveOldFriends();
       clear();
       apiManager.clear();
+      
+      runNumber++;
 
       for (var i = 0; i < list.length; i++) {
         var name = list[i].trim().toLowerCase();
@@ -484,11 +506,8 @@ $( document ).ready(function() {
         });
       }
       
-      
-
       apiManager.start(function() {
         autosize();
-
         if(!document.hasFocus()) scrollUp();
         console.log("done");
         a.scanning = false;
