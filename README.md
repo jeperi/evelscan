@@ -6,8 +6,6 @@ EVE L-SCAN is a tool for quickly retrieving some information about people in the
 
 Mostly coded for fun as a personal project, but it might be useful for some people.
 
-*DISCLAIMER: THIS TOOL IS A PROTOTYPE AND VERY MUCH IN BETA.*
-
 Much of the planned functionality is non-existing. What exists, works, however.
 
 ## How does it work?
@@ -15,6 +13,7 @@ Much of the planned functionality is non-existing. What exists, works, however.
 The program checks your clipboard periodically and waits for you to copy a set of character names from EVE's local chat window.
 
 If your character's name is found on the clipboard, the program assumes that you have copied the chat window's contact list. The content of the clipboard is then parsed and the resulting list of names is used to query information about the characters from the backend server.
+
 What information does it provide?
 
     - Character's Name
@@ -47,26 +46,6 @@ The program will now start fetching and displaying information about the charact
 
 MIT License
 
-Copyright (c) 2017 jeperi
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
 ## FAQ
 
 ## There's already an app for this!
@@ -79,18 +58,17 @@ It's used for determining whether whatever you happened to copy to your clipboar
 
 ## Is my character's name transmitted somewhere?
 
-Simply put, yes - but not immediately. It's part of the local chat's contact list and is therefore analyzed as well.
+Simply put, yes. It's part of the local chat's contact list and is therefore analyzed as well.
 
-However, it's not singled out in a way that's easy to distinguish.
+However, it's not singled out in a way that's easy to distinguish. In fact, querying information about every other character but yours in a system would be a much more obvious way to broadcast your identity. If you know who are actually in Jita, it's easy to see whose name is missing from the query.
 
-Requests are also cached locally. Your name is therefore transmitted to the server only once per session, making it hard to determine which character belongs to the person querying the data.
+Requests are also cached locally. Your name is therefore transmitted to the server only once per session (per hour), making it hard to determine which character belongs to the person querying the data.
 
-Note that removing the name from the list would also make it possible to identify you: if you know who's actually in Jita, it's easy to see whose name is missing from the query.
-Why does the program connect to the server in startup?
+## Why does the program connect to the server in startup?
 
 It's implemented mostly for future use, such as update notifications.
 
-No personally identifiable information is purposefully leaked. The connection consists of a single GET request with no headers apart from the default ones jQuery kindly provides us. You can do the same with your browser by going to http://51.15.49.79/test.
+No personally identifiable information is purposefully leaked. The connection consists of a single GET request with no headers apart from the default ones jQuery kindly provides us, alongside the current version used.
 
 ## What information is transmitted?
 
@@ -98,24 +76,28 @@ List of transmitted information (that I know of):
 
     Your IP-Address (Cannot be worked around, thank however engineered the internet)
     Default headers of the various libraries/frameworks used. (These should not contain anything unique.)
+    Version number of the program.
     Characters' names the program finds on your clipboard.
 
-Feel free to observe the communications using something like Fiddler or Wireshark.
+Feel free to observe the communications using something like Fiddler or Wireshark (Not too easy anymore, we got SSL now).
 
 ## What if I want to keep my clipboard private?
 
 The program checks if the text you have copied on the clipboard contains your character's name (that the program asks for) and only then tries to parse it to a list of names. Therefore other things you might want to use the clipboard for should stay safe, unless they contain your character's name in the correct format, of course. You are responsible for making sure you're not leaking anything you'd rather keep private.
-Does this interfere with other programs that use the clipboard?
+
+## Does this interfere with other programs that use the clipboard?
 
 No, as far as I know. The program only reads the clipboard periodically, and should not prevent any other program from doing the same.
 
 ## Why not use the public APIs directly?
 
-Proxy server is a good way to avoid hammering CCP's and zKillboard's servers. Requests are cached and kept around for a long time, reducing the amount of queries on both public APIs. Cache hits are not rate limited, but requests to zKillboard are, and heavily.
+I like programming and administering servers.
+
+Proxy server is a good way to avoid hammering CCP's and zKillboard's servers. Requests are cached and kept around for a long time, reducing the amount of queries on both public APIs. Cache hits are not rate limited, but requests to zKillboard are.
+
+Stats are updated from new killmails, so they should be up to date.
 
 Information about characters, corporations and alliances are all cached separately, so there's no need to query for information of the same corporation/alliance multiple times.
-
-Also, I like programming and administering servers.
 
 ## Why is the download size of the program so extreme?
 
@@ -131,10 +113,6 @@ There's also a reddit thread [here](https://www.reddit.com/r/Eve/comments/60mkw8
 
 Check the answer above this one.
 
-## There's something I want to ask.
-
-Refer to the answer above this one.
-
 ## Technical details
 
 ### Client
@@ -149,4 +127,4 @@ Requests are cached locally and information about every character gets requested
 
 The backend server is coded in Golang.
 
-The data is really heavily cached and sourced from the free APIs kindly provided by CCP and zKillboard.
+The data is sourced from the free APIs kindly provided by CCP and zKillboard.
