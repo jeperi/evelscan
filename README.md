@@ -2,7 +2,7 @@
 
 EVE L-SCAN is a tool for quickly retrieving some information about people in the local system.
 
-[Screenshot](http://51.15.49.79/newshot.JPG)
+![Screenshot](https://raw.githubusercontent.com/jeperi/evelscan/master/screenshot.JPG)
 
 Mostly coded for fun as a personal project, but it might be useful for some people.
 
