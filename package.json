@@ -1,6 +1,6 @@
 {
   "name": "EVE-LSCAN",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "EVE Online utility",
   "main": "main.js",
   "scripts": {
